@@ -23,7 +23,7 @@
         .client-card {
             background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 35px; width: 100%; max-width: 400px; padding: 25px;
+            border-radius: 35px; width: 100%; max-width: 420px; padding: 25px;
             box-shadow: 0 40px 100px rgba(0,0,0,0.5);
             text-align: center;
         }
@@ -43,16 +43,28 @@
         .info-row {
             display: flex; justify-content: space-between; align-items: center;
             padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+            gap: 10px;
         }
         .info-row:last-child { border: none; }
 
-        .label { font-size: 12px; color: var(--accent); font-weight: bold; flex: 1; text-align: right; }
-        .value { font-size: 14px; font-weight: 600; font-family: monospace; flex: 2; text-align: center; word-break: break-all; }
+        .label { font-size: 12px; color: var(--accent); font-weight: bold; white-space: nowrap; }
+        
+        /* التعديل هنا: منع السطرين وتصغير الخط عند اللزوم */
+        .value { 
+            font-size: 13px; 
+            font-weight: 600; 
+            font-family: monospace; 
+            flex: 1; 
+            text-align: center; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
 
         .copy-btn {
             background: var(--glass); border: 1px solid var(--accent); color: var(--accent);
             padding: 4px 10px; border-radius: 8px; font-size: 11px; cursor: pointer;
-            width: 50px; transition: 0.2s;
+            min-width: 50px; transition: 0.2s;
         }
         .copy-btn:active { background: var(--accent); color: black; }
 
@@ -99,7 +111,7 @@
             </div>
             <div class="info-row">
                 <span class="label">الحساب:</span>
-                <span id="email" class="value">---</span>
+                <span id="email" class="value" style="font-size: 11px;">---</span>
                 <button class="copy-btn" onclick="copyText('email')">نسخ</button>
             </div>
             <div class="info-row">
@@ -110,11 +122,12 @@
             <div class="info-row">
                 <span class="label">المواليد:</span>
                 <span id="dob" class="value">---</span>
-                <div style="width:50px"></div> </div>
+                <div style="min-width:50px"></div>
+            </div>
             <div id="finalPhoneRow" class="info-row" style="display: none;">
                 <span class="label">رقم الهاتف:</span>
                 <span id="displayPhone" class="value" style="color: var(--accent);"></span>
-                <div style="width:50px"></div>
+                <div style="min-width:50px"></div>
             </div>
         </div>
 
@@ -133,6 +146,7 @@
     </div>
 
     <script>
+        // الكود البرمجي (Firebase) يبقى كما هو بدون تغيير
         const firebaseConfig = {
             apiKey: "AIzaSyBpt495yhuoTbjunCLIFCF_8c1NesxZHWs",
             authDomain: "shopweb-3466b.firebaseapp.com",
@@ -157,10 +171,7 @@
                     document.getElementById("email").innerText = d.email;
                     document.getElementById("password").innerText = d.password;
                     document.getElementById("dob").innerText = d.dob;
-                    
-                    if(d.status === "active") {
-                        showActivatedMode(d.phone);
-                    }
+                    if(d.status === "active") showActivatedMode(d.phone);
                 }
             });
         }
@@ -168,20 +179,11 @@
         function activateGuarantee() {
             const phone = document.getElementById("phoneInput").value;
             if (phone.length < 10) { alert("يرجى كتابة رقم هاتف صحيح"); return; }
-
-            const confirmAction = confirm("تنبيه: بمجرد الحفظ لا يمكنك تغيير رقم الهاتف نهائياً. هل أنت متأكد؟");
-            
-            if (confirmAction) {
+            if (confirm("تنبيه: بمجرد الحفظ لا يمكنك تغيير رقم الهاتف نهائياً. هل أنت متأكد؟")) {
                 const date = new Date();
                 const dateStr = date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear();
-                
-                db.ref('icloud_cards/' + customerId).update({
-                    phone: phone,
-                    status: "active",
-                    activationDate: dateStr
-                }).then(() => {
-                    showActivatedMode(phone);
-                });
+                db.ref('icloud_cards/' + customerId).update({ phone: phone, status: "active", activationDate: dateStr })
+                .then(() => showActivatedMode(phone));
             }
         }
 
@@ -196,7 +198,7 @@
             const area = document.getElementById("captureArea");
             html2canvas(area, { backgroundColor: "#0f172a", scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `وصل-مركز-الراشد-${document.getElementById("firstName").innerText}.png`;
+                link.download = `وصل-مركز-الراشد.png`;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
