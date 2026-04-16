@@ -3,90 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة مركز الراشد - iCloud Control</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <title>مركز الراشد - بطاقة iCloud الخاصة بك</title>
+    
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        :root { --accent: #00d2ff; --glass: rgba(255, 255, 255, 0.05); }
-        body {
-            background: linear-gradient(45deg, #0f172a, #1e293b);
-            color: white; font-family: 'Segoe UI', sans-serif;
-            margin: 0; padding: 20px; direction: rtl; min-height: 100vh;
-        }
-        .admin-card {
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px; max-width: 1100px; margin: 0 auto; padding: 30px;
-        }
-        header { text-align: center; margin-bottom: 30px; }
-        header h1 { color: var(--accent); font-size: 26px; }
+        :root { --accent: #00d2ff; --glass: rgba(255, 255, 255, 0.05); --success: #10b981; }
         
-        .stats-row { display: flex; gap: 15px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
-        .stat-item { background: var(--glass); padding: 15px 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); min-width: 150px; text-align: center; }
-        .stat-item span { display: block; font-size: 24px; font-weight: bold; color: var(--accent); }
-
-        #generateBtn {
-            width: 100%; padding: 18px; background: var(--accent); color: #000;
-            border: none; border-radius: 15px; font-size: 18px; font-weight: bold;
-            cursor: pointer; transition: 0.3s; margin-bottom: 30px;
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white; font-family: 'Segoe UI', sans-serif;
+            margin: 0; padding: 15px; direction: rtl; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center;
         }
 
-        .preview-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .preview-content { background: #1e293b; padding: 30px; border-radius: 25px; text-align: center; width: 350px; border: 1px solid var(--accent); }
-        #qrcode { background: white; padding: 10px; border-radius: 15px; display: inline-block; }
+        .client-card {
+            background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 35px; width: 100%; max-width: 400px; padding: 25px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+            text-align: center;
+        }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
-        th { background: rgba(255,255,255,0.05); padding: 15px; color: var(--accent); text-align: right; }
-        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .active-badge { color: #10b981; font-weight: bold; }
-        .view-btn, .delete-btn { border: none; padding: 8px; border-radius: 8px; cursor: pointer; margin: 2px; }
-        .view-btn { background: var(--accent); color: #000; }
-        .delete-btn { background: #ef4444; color: white; }
+        header i { font-size: 45px; color: white; margin-bottom: 10px; }
+        header h1 { color: var(--accent); font-size: 24px; margin: 5px 0; }
+        
+        .warranty-tag {
+            background: rgba(0, 210, 255, 0.1); border: 1px dashed var(--accent);
+            padding: 10px; border-radius: 15px; margin: 15px 0; font-size: 13px;
+        }
+
+        .info-container {
+            background: rgba(0,0,0,0.2); border-radius: 20px; padding: 15px; margin-bottom: 20px;
+        }
+
+        .info-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .info-row:last-child { border: none; }
+
+        .label { font-size: 12px; color: var(--accent); font-weight: bold; }
+        .value { font-size: 14px; font-weight: 600; font-family: monospace; }
+
+        .copy-btn {
+            background: var(--glass); border: 1px solid var(--accent); color: var(--accent);
+            padding: 4px 10px; border-radius: 8px; font-size: 11px; cursor: pointer;
+        }
+
+        /* قسم الهاتف */
+        .phone-box {
+            background: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px; margin-top: 10px;
+        }
+
+        #phoneInput {
+            width: 85%; padding: 12px; border-radius: 12px; border: 1px solid var(--accent);
+            background: rgba(0,0,0,0.3); color: white; text-align: center; font-size: 18px; margin-bottom: 10px;
+        }
+
+        .btn-main {
+            width: 100%; padding: 14px; border-radius: 15px; border: none; font-weight: bold;
+            cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 16px;
+        }
+        .btn-activate { background: var(--accent); color: #000; }
+        .btn-download { background: var(--success); color: white; display: none; }
+        .btn-disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
+
+        footer { margin-top: 20px; font-size: 11px; opacity: 0.5; }
     </style>
 </head>
 <body>
-    <div class="admin-card">
+
+    <div class="client-card" id="captureArea">
         <header>
-            <h1><i class="fa-solid fa-gears"></i> مركز الراشد - لوحة الإدارة</h1>
-            <div class="stats-row">
-                <div class="stat-item">الكل <span id="totalCards">0</span></div>
-                <div class="stat-item">مفعلة ✅ <span id="activeCards">0</span></div>
+            <i class="fa-brands fa-apple"></i>
+            <h1>مركز الراشد</h1>
+            <div class="warranty-tag">
+                <i class="fa-solid fa-shield-check"></i> ضمان 6 أشهر من تاريخ التفعيل
             </div>
         </header>
 
-        <button id="generateBtn" onclick="handleGenerate()"><i class="fa-solid fa-plus"></i> إنشاء بطاقة ضمان جديدة</button>
-
-        <div style="overflow-x: auto;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>الاسم</th>
-                        <th>الايميل</th>
-                        <th>الهاتف</th>
-                        <th>تاريخ التفعيل</th>
-                        <th>الحالة</th>
-                        <th>تحكم</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <div id="previewOverlay" class="preview-overlay">
-        <div class="preview-content">
-            <h3 id="previewTitle" style="color:white; margin-bottom:15px;"></h3>
-            <div id="qrcode"></div>
-            <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
-                <button onclick="downloadQR()" style="background:#10b981; border:none; padding:12px; border-radius:10px; color:white; font-weight:bold; cursor:pointer;">حفظ الباركود صافي</button>
-                <button onclick="document.getElementById('previewOverlay').style.display='none'" style="background:#64748b; border:none; padding:10px; border-radius:10px; color:white; cursor:pointer;">إغلاق</button>
+        <div class="info-container">
+            <div class="info-row">
+                <span class="label">الاسم:</span>
+                <span id="name" class="value">---</span>
+            </div>
+            <div class="info-row">
+                <span class="label">الحساب:</span>
+                <span id="email" class="value">---</span>
+                <button class="copy-btn" onclick="copyText('email')">نسخ</button>
+            </div>
+            <div class="info-row">
+                <span class="label">الباسورد:</span>
+                <span id="password" class="value">---</span>
+                <button class="copy-btn" onclick="copyText('password')">نسخ</button>
+            </div>
+            <div class="info-row">
+                <span class="label">المواليد:</span>
+                <span id="dob" class="value">---</span>
+            </div>
+            <div id="finalPhoneRow" class="info-row" style="display: none;">
+                <span class="label">رقم الهاتف:</span>
+                <span id="displayPhone" class="value" style="color: var(--accent);"></span>
             </div>
         </div>
+
+        <div class="phone-box" id="activationBox">
+            <div id="inputGroup">
+                <p style="font-size: 12px; margin-bottom: 10px;">سجل رقمك لتفعيل الضمان وحفظ الوصل:</p>
+                <input type="tel" id="phoneInput" placeholder="07XXXXXXXXX">
+                <button class="btn-main btn-activate" onclick="activateGuarantee()">تفعيل الضمان الآن</button>
+            </div>
+            <button id="downloadBtn" class="btn-main btn-download" onclick="downloadVoucher()">
+                <i class="fa-solid fa-file-arrow-down"></i> حفظ الوصل في الجهاز
+            </button>
+        </div>
+
+        <footer>جميع الحقوق محفوظة - مركز الراشد 2026</footer>
     </div>
 
     <script>
+        // 1. إعدادات Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBpt495yhuoTbjunCLIFCF_8c1NesxZHWs",
             authDomain: "shopweb-3466b.firebaseapp.com",
@@ -98,65 +138,71 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const clientSiteUrl = "https://alrashed-icloud.netlify.app/";
 
-        async function handleGenerate() {
-            const boys = ["أحمد", "علي", "سجاد", "حسين", "يوسف", "مصطفى"];
-            const fathers = ["كريم", "جاسم", "محمد", "عباس", "رعد"];
-            const fName = boys[Math.floor(Math.random()*boys.length)];
-            const lName = fathers[Math.floor(Math.random()*fathers.length)];
-            const year = Math.floor(Math.random()*(2007-1992+1))+1992;
+        const urlParams = new URLSearchParams(window.location.search);
+        const customerId = urlParams.get('id');
+
+        // جلب البيانات
+        if (customerId) {
+            db.ref('icloud_cards/' + customerId).on('value', (snap) => {
+                const d = snap.val();
+                if (d) {
+                    document.getElementById("name").innerText = d.firstName + " " + d.lastName;
+                    document.getElementById("email").innerText = d.email;
+                    document.getElementById("password").innerText = d.password;
+                    document.getElementById("dob").innerText = d.dob;
+                    
+                    if(d.status === "active") {
+                        showActivatedMode(d.phone);
+                    }
+                }
+            });
+        }
+
+        // تفعيل الضمان
+        function activateGuarantee() {
+            const phone = document.getElementById("phoneInput").value;
+            if (phone.length < 10) { alert("يرجى كتابة رقم هاتف صحيح"); return; }
+
+            const confirmAction = confirm("تنبيه: بمجرد الحفظ لا يمكنك تغيير رقم الهاتف نهائياً. هل أنت متأكد؟");
             
-            const newRef = db.ref('icloud_cards').push();
-            await newRef.set({
-                firstName: fName, lastName: lName, dob: "1/1/"+year,
-                email: "user"+Math.floor(Math.random()*99)+year+"@icloud.com",
-                password: "AiQ#"+Math.floor(1000+Math.random()*9000),
-                status: "pending", phone: "لم يسجل بعد", activationDate: "---"
-            });
-            openPreview(newRef.key, fName + " " + lName);
-        }
-
-        function openPreview(id, name) {
-            document.getElementById("previewTitle").innerText = name;
-            document.getElementById("qrcode").innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), { text: clientSiteUrl+"?id="+id, width: 250, height: 250 });
-            document.getElementById("previewOverlay").style.display = "flex";
-            window.currentName = name;
-        }
-
-        function downloadQR() {
-            const canvas = document.querySelector("#qrcode canvas");
-            const link = document.createElement('a');
-            link.download = `باركود-${window.currentName}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-        }
-
-        function loadData() {
-            db.ref('icloud_cards').on('value', (snap) => {
-                let html = ""; let activeCount = 0;
-                document.getElementById("totalCards").innerText = snap.numChildren();
-                snap.forEach(c => {
-                    const d = c.val();
-                    if(d.status === 'active') activeCount++;
-                    html = `<tr>
-                        <td>${d.firstName} ${d.lastName}</td>
-                        <td>${d.email}</td>
-                        <td style="color:var(--accent)">${d.phone}</td>
-                        <td>${d.activationDate}</td>
-                        <td>${d.status === 'active' ? '<span class="active-badge">✅ مفعل</span>' : '⏳ بانتظار الزبون'}</td>
-                        <td>
-                            <button class="view-btn" onclick="openPreview('${c.key}', '${d.firstName}')"><i class="fa-solid fa-qrcode"></i></button>
-                            <button class="delete-btn" onclick="if(prompt('yes للتأكيد')=='yes') db.ref('icloud_cards/${c.key}').remove()"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>` + html;
+            if (confirmAction) {
+                const date = new Date();
+                const dateStr = date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear();
+                
+                db.ref('icloud_cards/' + customerId).update({
+                    phone: phone,
+                    status: "active",
+                    activationDate: dateStr
+                }).then(() => {
+                    alert("تم تفعيل الضمان بنجاح!");
+                    showActivatedMode(phone);
                 });
-                document.getElementById("tableBody").innerHTML = html;
-                document.getElementById("activeCards").innerText = activeCount;
+            }
+        }
+
+        function showActivatedMode(phone) {
+            document.getElementById("inputGroup").style.display = "none";
+            document.getElementById("downloadBtn").style.display = "block";
+            document.getElementById("finalPhoneRow").style.display = "flex";
+            document.getElementById("displayPhone").innerText = phone;
+        }
+
+        // حفظ الوصل كصورة
+        function downloadVoucher() {
+            const area = document.getElementById("captureArea");
+            html2canvas(area, { backgroundColor: "#0f172a", scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `وصل-مركز-الراشد-${document.getElementById("name").innerText}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
             });
         }
-        window.onload = loadData;
+
+        function copyText(id) {
+            const txt = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(txt).then(() => alert("تم النسخ بنجاح"));
+        }
     </script>
 </body>
 </html>
