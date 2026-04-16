@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>معلومات الحساب - مركز الراشد</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+
+    <div id="loader" class="loader-container">جاري جلب بيانات الحساب...</div>
+
+    <div id="mainContainer" class="container" style="display: none;">
+        <div class="success-banner">
+            الحساب مرتبط برقمك الشخصي ✓
+        </div>
+
+        <div class="card">
+            <div class="field-group">
+                <label>الاسم الأول</label>
+                <div class="input-wrapper">
+                    <input id="fName" readonly type="text" value="">
+                    <button onclick="copy('fName')"><i class="fa-solid fa-paste"></i></button>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>الاسم الثاني</label>
+                <div class="input-wrapper">
+                    <input id="lName" readonly type="text" value="">
+                    <button onclick="copy('lName')"><i class="fa-solid fa-paste"></i></button>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>المواليد</label>
+                <div class="input-wrapper">
+                    <input id="dob" readonly type="text" value="">
+                    <button onclick="copy('dob')"><i class="fa-solid fa-paste"></i></button>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="field-group">
+                <label>(Email) البريد الإلكتروني</label>
+                <div class="input-wrapper account-field">
+                    <input id="email" readonly type="text" value="">
+                    <button onclick="copy('email')"><i class="fa-solid fa-paste"></i></button>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>(Password) كلمة المرور</label>
+                <div class="input-wrapper account-field">
+                    <input id="pass" readonly type="text" value="">
+                    <button onclick="copy('pass')"><i class="fa-solid fa-paste"></i></button>
+                </div>
+            </div>
+
+            <button class="video-btn">
+                <span>🎥</span> فيديو طريقة الإنشاء
+            </button>
+
+            <p class="warning-text">⚠️ بيانات خاصة، لا تشاركها مع أحد</p>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
