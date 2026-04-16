@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مركز الراشد - بطاقة iCloud الخاصة بك</title>
+    <title>مركز الراشد - معلومات iCloud</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -46,22 +46,23 @@
         }
         .info-row:last-child { border: none; }
 
-        .label { font-size: 12px; color: var(--accent); font-weight: bold; }
-        .value { font-size: 14px; font-weight: 600; font-family: monospace; }
+        .label { font-size: 12px; color: var(--accent); font-weight: bold; flex: 1; text-align: right; }
+        .value { font-size: 14px; font-weight: 600; font-family: monospace; flex: 2; text-align: center; word-break: break-all; }
 
         .copy-btn {
             background: var(--glass); border: 1px solid var(--accent); color: var(--accent);
             padding: 4px 10px; border-radius: 8px; font-size: 11px; cursor: pointer;
+            width: 50px; transition: 0.2s;
         }
+        .copy-btn:active { background: var(--accent); color: black; }
 
-        /* قسم الهاتف */
         .phone-box {
             background: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px; margin-top: 10px;
         }
 
         #phoneInput {
             width: 85%; padding: 12px; border-radius: 12px; border: 1px solid var(--accent);
-            background: rgba(0,0,0,0.3); color: white; text-align: center; font-size: 18px; margin-bottom: 10px;
+            background: rgba(0,0,0,0.3); color: white; text-align: center; font-size: 18px; margin-bottom: 10px; outline: none;
         }
 
         .btn-main {
@@ -70,7 +71,6 @@
         }
         .btn-activate { background: var(--accent); color: #000; }
         .btn-download { background: var(--success); color: white; display: none; }
-        .btn-disabled { background: #475569; color: #94a3b8; cursor: not-allowed; }
 
         footer { margin-top: 20px; font-size: 11px; opacity: 0.5; }
     </style>
@@ -88,8 +88,14 @@
 
         <div class="info-container">
             <div class="info-row">
-                <span class="label">الاسم:</span>
-                <span id="name" class="value">---</span>
+                <span class="label">الاسم الأول:</span>
+                <span id="firstName" class="value">---</span>
+                <button class="copy-btn" onclick="copyText('firstName')">نسخ</button>
+            </div>
+            <div class="info-row">
+                <span class="label">اسم الأب:</span>
+                <span id="lastName" class="value">---</span>
+                <button class="copy-btn" onclick="copyText('lastName')">نسخ</button>
             </div>
             <div class="info-row">
                 <span class="label">الحساب:</span>
@@ -104,10 +110,11 @@
             <div class="info-row">
                 <span class="label">المواليد:</span>
                 <span id="dob" class="value">---</span>
-            </div>
+                <div style="width:50px"></div> </div>
             <div id="finalPhoneRow" class="info-row" style="display: none;">
                 <span class="label">رقم الهاتف:</span>
                 <span id="displayPhone" class="value" style="color: var(--accent);"></span>
+                <div style="width:50px"></div>
             </div>
         </div>
 
@@ -126,7 +133,6 @@
     </div>
 
     <script>
-        // 1. إعدادات Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBpt495yhuoTbjunCLIFCF_8c1NesxZHWs",
             authDomain: "shopweb-3466b.firebaseapp.com",
@@ -142,12 +148,12 @@
         const urlParams = new URLSearchParams(window.location.search);
         const customerId = urlParams.get('id');
 
-        // جلب البيانات
         if (customerId) {
             db.ref('icloud_cards/' + customerId).on('value', (snap) => {
                 const d = snap.val();
                 if (d) {
-                    document.getElementById("name").innerText = d.firstName + " " + d.lastName;
+                    document.getElementById("firstName").innerText = d.firstName;
+                    document.getElementById("lastName").innerText = d.lastName;
                     document.getElementById("email").innerText = d.email;
                     document.getElementById("password").innerText = d.password;
                     document.getElementById("dob").innerText = d.dob;
@@ -159,7 +165,6 @@
             });
         }
 
-        // تفعيل الضمان
         function activateGuarantee() {
             const phone = document.getElementById("phoneInput").value;
             if (phone.length < 10) { alert("يرجى كتابة رقم هاتف صحيح"); return; }
@@ -175,7 +180,6 @@
                     status: "active",
                     activationDate: dateStr
                 }).then(() => {
-                    alert("تم تفعيل الضمان بنجاح!");
                     showActivatedMode(phone);
                 });
             }
@@ -188,12 +192,11 @@
             document.getElementById("displayPhone").innerText = phone;
         }
 
-        // حفظ الوصل كصورة
         function downloadVoucher() {
             const area = document.getElementById("captureArea");
             html2canvas(area, { backgroundColor: "#0f172a", scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `وصل-مركز-الراشد-${document.getElementById("name").innerText}.png`;
+                link.download = `وصل-مركز-الراشد-${document.getElementById("firstName").innerText}.png`;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
@@ -201,7 +204,12 @@
 
         function copyText(id) {
             const txt = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(txt).then(() => alert("تم النسخ بنجاح"));
+            navigator.clipboard.writeText(txt).then(() => {
+                const btn = event.target;
+                const originalText = btn.innerText;
+                btn.innerText = "تم!";
+                setTimeout(() => btn.innerText = originalText, 1500);
+            });
         }
     </script>
 </body>
